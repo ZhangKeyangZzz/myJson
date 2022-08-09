@@ -38,6 +38,8 @@ int Json_ArrayRemove(JSON* array, int index, JSON** value);
 int Json_ArrayGet(JSON* array, int index, JSON** value);
 int Json_ArraySet(JSON* array, int index, JSON* value);
 JSON* Json_Object(void);
+int Json_ObjectSize(JSON* object);
+int Json_ObjectContains(JSON* object, const char* key);
 int Json_ObjectPut(JSON* object, const char* key, JSON* value);
 int Json_ObjectGet(JSON* object, const char* key, JSON** value);
 int Json_ObjectRemove(JSON* object, const char* key);
