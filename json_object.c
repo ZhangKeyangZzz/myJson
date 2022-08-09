@@ -3,7 +3,7 @@
 #include "json_value.h"
 #include "unicode.h"
 
-
+#define MAX_CAPACITY        (1 << 30)
 #define DEFAULT_CAPACITY    16
 #define DEFAULT_LOADFACTOR  0.75
 
@@ -25,6 +25,9 @@ static inline JsonObjectPair* newObjectBucket(int capacity)
 
 static inline void jsonObjectGrow(JsonObject* object)
 {
+    if (object->cap >= MAX_CAPACITY)
+        return;
+    int newLen = 0;
     int newCap = 2 * object->cap;
     JsonObjectPair* newBucket = newObjectBucket(newCap);
     if (newBucket == NULL)
@@ -37,11 +40,15 @@ static inline void jsonObjectGrow(JsonObject* object)
             object->bucket[index].next = pair->next;
             if ((pair->hash & object->cap) != 0)
             {
-                pair->next = newBucket[2 * index].next;
-                newBucket[2 * index].next = pair;
+                if (newBucket[index+object->cap].next == &newBucket[index+object->cap])  
+                    newLen++;
+                pair->next = newBucket[index+object->cap].next;
+                newBucket[index+object->cap].next = pair;
             }
             else
             {
+                if (newBucket[index].next == &newBucket[index])
+                    newLen++;
                 pair->next = newBucket[index].next;
                 newBucket[index].next = pair;
             }
@@ -50,6 +57,7 @@ static inline void jsonObjectGrow(JsonObject* object)
     }
     free(object->bucket);
     object->cap = newCap;
+    object->len = newLen;
     object->bucket = newBucket;
 }
 
