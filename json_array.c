@@ -5,9 +5,18 @@
 static inline JsonArrayItem* locateArrayItem(JsonArray* array, int index)
 {
     JsonArrayItem* iter = array->head;
-    for (int i = 0; i < index; i++)
-        iter = iter->next;
-    return iter;
+    if (index < array->len / 2)
+    {
+        for (int i = 0; i < index; i++)
+            iter = iter->next;
+        return iter->next;
+    }
+    else
+    {
+        for (int i = 0; i < array->len - index - 1; i++)
+            iter = iter->prev;
+        return iter->prev;
+    }
 }
 
 
@@ -108,7 +117,7 @@ int jsonArrayInsert(JsonArray* array, int index, JsonValue* value)
     if (item == NULL)
         return 0;
     JsonArrayItem* target = locateArrayItem(array, index);
-    linkArrayItem(target, item);
+    linkArrayItem(target->prev, item);
     array->len++;
     return 1;
 }
@@ -145,7 +154,6 @@ int jsonArrayPoll(JsonArray* array, JsonValue** value)
 int jsonArrayRemove(JsonArray* array, int index, JsonValue** value)
 {
     JsonArrayItem* item = locateArrayItem(array, index);
-    item = item->next;
     unlinkArrayItem(item);
     if (value != NULL)
         *value = item->value;
@@ -160,7 +168,6 @@ int jsonArrayGet(JsonArray* array, int index, JsonValue** value)
     if (index < 0 || index >= array->len)
         return 0;
     JsonArrayItem* item = locateArrayItem(array, index);
-    item = item->next;
     if (value != NULL)
         *value = item->value;
     return 1;
@@ -172,7 +179,6 @@ int jsonArraySet(JsonArray* array, int index, JsonValue* value)
     if (index < 0 || index >= array->len)
         return 0;
     JsonArrayItem* item = locateArrayItem(array, index);
-    item = item->next;
     jsonDelete(item->value);
     item->value = value;
     return 1;
