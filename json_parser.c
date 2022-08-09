@@ -117,7 +117,7 @@ static inline int jsonParseFalse(char** str, int *max)
 }
 
 
-static inline double jsonParseNumber(char** str, int* max)
+static inline int jsonParseNumber(char** str, int* max, double* value)
 {
     int sign = 1;
     double number = 0.0f;
@@ -131,8 +131,10 @@ static inline double jsonParseNumber(char** str, int* max)
     if (rune == '-')
         sign = -1, rune = takeRune(str, max);
     int state = 0;
+    int oldState = 0;
     while (rune != 0 && state != -1)
     {
+        oldState = state;
         switch (state) {
         case -1:
             break;
@@ -215,6 +217,11 @@ static inline double jsonParseNumber(char** str, int* max)
         }
         if (state == -1)
         {
+            if (oldState == 0 || oldState == 3 || oldState == 5 || 
+                oldState == 6 || oldState == 8)
+            {
+                return 0;
+            }
             backRune(str, max, rune);
             break;
         }
@@ -228,13 +235,14 @@ static inline double jsonParseNumber(char** str, int* max)
         number = number + fraction * qpow(10, -fractions);
     if (exponent > 0)
         number = number * qpow(10, expsign * exponent);
-    return number;
+    *value = number;
+    return 1;
 }
 
 
 static inline JsonString* jsonParseString(char** str, int* max)
 {
-    int state = 0;
+    int state = 0;    
     int size = 0;
     int rune = takeRune(str, max);
     JsonByteBuf bytebuf;
@@ -337,8 +345,8 @@ static inline JsonString* jsonParseString(char** str, int* max)
             break;
         if (state == -1)
         {
-            backRune(str, max, rune);
-            break;
+            jsonUninitByteBuf(&bytebuf);
+            return NULL;
         }
         rune = takeRune(str, max);
     }
@@ -422,10 +430,13 @@ JsonValue* jsonParse(char** str, int *max)
     }
     else if (rune == '-' || (rune >= '0' && rune <= '9'))
     {
+        double value = 0;
+        if (!jsonParseNumber(str, max, &value))
+            return NULL;
         JsonValue* number = newJsonValue(JSON_NUMBER);
         if (number == NULL)
             return NULL;
-        number->value.number = jsonParseNumber(str, max);
+        number->value.number = value;
         return number;
     }
     else if (rune == '"')
