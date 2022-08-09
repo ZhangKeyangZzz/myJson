@@ -13,7 +13,7 @@ extern JsonValue jsonFalse;
 int Json_Type(JSON* json)
 {
     JsonValue* jsonValue = (JsonValue*)json;
-    return jsonValue->type;
+    return jsonValue == NULL ? -1 : jsonValue->type;
 }
 
 
@@ -246,6 +246,24 @@ JSON* Json_Object(void)
 }
 
 
+int Json_ObjectSize(JSON* object)
+{
+    if (object == NULL)
+        return 0;
+    JsonValue* objectValue = (JsonValue*)object;
+    if (objectValue->type != JSON_OBJECT)
+        return 0;
+    return objectValue->value.object->size;
+}
+
+
+int Json_ObjectContains(JSON* object, const char* key)
+{
+    JSON* value = NULL;
+    return Json_ObjectGet(object, key, &value);
+}
+
+
 int Json_ObjectPut(JSON* object, const char* key, JSON* value)
 {
     if (object == NULL || key == NULL || value == NULL)
@@ -284,7 +302,8 @@ int Json_ObjectRemove(JSON* object, const char* key)
 void Json_Delete(JSON* json)
 {
     JsonValue* jsonValue = (JsonValue*)json;
-    jsonDelete(jsonValue);
+    if (jsonValue != NULL)
+        jsonDelete(jsonValue);
 }
 
 
@@ -307,6 +326,8 @@ char* Json_Print(JSON* json, int* len)
 
 JSON* Json_Parse(const char* str, int len)
 {
+    if (str == NULL)
+        return NULL;
     int max = strlen(str);
     if (len < 0)
         len = max;
