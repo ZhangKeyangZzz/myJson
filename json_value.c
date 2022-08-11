@@ -110,7 +110,7 @@ int jsonWriteNumber(JsonByteBuf* bytebuf, double number)
         {
             number -= step * (int)(low * 10);
             step /= 10;
-            ans += jsonByteBufWrite(bytebuf, (int)(low * 10));
+            ans += jsonByteBufWrite(bytebuf, '0' + (int)(low * 10));
             low = low * 10.0 - (int)(low * 10);
         }
     }
