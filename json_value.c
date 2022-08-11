@@ -97,14 +97,17 @@ int jsonWriteNumber(JsonByteBuf* bytebuf, double number)
     for (int i = n - 1; i >= 0; i--)
         ans += jsonByteBufWrite(bytebuf, ch[i]);
     number = number - (int)number;
-    double step = 0.1;
-    ans += jsonByteBufWrite(bytebuf, '.');
-    while (number > FLOAT_EPS)
+    if (number > 0)
     {
-        number -= step * (int)(low * 10);
-        step /= 10;
-        ans += jsonByteBufWrite(bytebuf, (int)(low * 10));
-        low = low * 10.0 - (int)(low * 10);
+        double step = 0.1;
+        ans += jsonByteBufWrite(bytebuf, '.');
+        while (number > FLOAT_EPS)
+        {
+            number -= step * (int)(low * 10);
+            step /= 10;
+            ans += jsonByteBufWrite(bytebuf, (int)(low * 10));
+            low = low * 10.0 - (int)(low * 10);
+        }
     }
     return ans;
 }
