@@ -5,6 +5,9 @@
 #include "json_value.h"
 
 
+#define FLOAT_EPS   1e-11
+
+
 JsonValue jsonNull = {
     .type = JSON_NULL,
     .value = { 0 },
@@ -81,10 +84,29 @@ int jsonWriteFalse(JsonByteBuf* bytebuf)
 
 int jsonWriteNumber(JsonByteBuf* bytebuf, double number)
 {
-    char buf[64] = {0};
-    snprintf(buf, 64, "%lf", number);
-    int len = strlen(buf);
-    return jsonByteBufWrites(bytebuf, buf, len);
+    int n = 0;
+    int ans = 0;
+    int high = (int)number;
+    double low = number - high;    
+    char ch[64] = { 0 };  
+    while (high > 0)
+    {
+        ch[n++] = high % 10 + '0';
+        high = high / 10;
+    }
+    for (int i = n - 1; i >= 0; i--)
+        ans += jsonByteBufWrite(bytebuf, ch[i]);
+    number = number - (int)number;
+    double step = 0.1;
+    ans += jsonByteBufWrite(bytebuf, '.');
+    while (number > FLOAT_EPS)
+    {
+        number -= step * (int)(low * 10);
+        step /= 10;
+        ans += jsonByteBufWrite(bytebuf, (int)(low * 10));
+        low = low * 10.0 - (int)(low * 10);
+    }
+    return ans;
 }
 
 
