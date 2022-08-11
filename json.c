@@ -62,8 +62,9 @@ JSON* Json_String(const char* bytes, int len)
     if (len < 0)
         len = strlen(bytes);
     JsonValue* jsonValue = newJsonValue(JSON_STRING);
-    if (jsonValue != NULL)
-        jsonValue->value.string = jsonNewString(bytes, len);
+    JsonString* jsonString = jsonNewString(bytes, len);
+    if (jsonValue != NULL && jsonString != NULL)
+        jsonValue->value.string = jsonString;
     return jsonValue;
 }
 
