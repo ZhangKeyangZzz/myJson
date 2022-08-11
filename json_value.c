@@ -84,16 +84,16 @@ int jsonWriteFalse(JsonByteBuf* bytebuf)
 
 int jsonWriteNumber(JsonByteBuf* bytebuf, double number)
 {
-    int n = 0;
-    int ans = 0;
-    int high = (int)number;
-    double low = number - high;
-    char ch[64] = { 0 };
     if (number < 0)
     {
         jsonByteBufWrite(bytebuf, '-');
         number = -number;
     }
+    int n = 0;
+    int ans = 0;
+    int high = (int)number;
+    double low = number - high;
+    char ch[64] = { 0 };
     while (high > 0)
     {
         ch[n++] = high % 10 + '0';
