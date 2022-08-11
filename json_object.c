@@ -121,7 +121,7 @@ int jsonObjectPut(JsonObject* object, const char* key, JsonValue* value)
     JsonObjectPair* target = object->bucket[index].next;
     while (target != &object->bucket[index])
     {
-        if (target->hash == hash && unicodeStrcmp(target->key, key))
+        if (target->hash == hash && 0 == unicodeStrcmp(target->key, key))
         {
             jsonDelete(target->value);
             target->value = value;
