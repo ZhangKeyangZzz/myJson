@@ -65,6 +65,12 @@ JSON* Json_String(const char* bytes, int len)
     JsonString* jsonString = jsonNewString(bytes, len);
     if (jsonValue != NULL && jsonString != NULL)
         jsonValue->value.string = jsonString;
+    else
+    {
+        free(jsonString);
+        free(jsonValue);
+        jsonValue = NULL;
+    }
     return jsonValue;
 }
 
@@ -112,8 +118,15 @@ int Json_ToString(JSON* json, char* buf, int len)
 JSON* Json_Array(void)
 {
     JsonValue* jsonValue = newJsonValue(JSON_ARRAY);
-    if (jsonValue != NULL)
-        jsonValue->value.array = jsonNewArray();
+    JsonArray* jsonArray = jsonNewArray();
+    if (jsonValue != NULL && jsonArray != NULL)
+        jsonValue->value.array = jsonArray;
+    else 
+    {
+        free(jsonArray);
+        free(jsonValue);
+        jsonValue = NULL;
+    }
     return jsonValue;
 }
 
@@ -241,8 +254,15 @@ int Json_ArraySet(JSON* array, int index, JSON* value)
 JSON* Json_Object(void)
 {
     JsonValue* jsonValue = newJsonValue(JSON_OBJECT);
+    JsonObject* jsonObject = jsonNewObject();
     if (jsonValue != NULL)
-        jsonValue->value.object = jsonNewObject();
+        jsonValue->value.object = jsonObject;
+    else 
+    {
+        free(jsonObject);
+        free(jsonValue);
+        jsonValue = NULL;
+    }
     return jsonValue;
 }
 
